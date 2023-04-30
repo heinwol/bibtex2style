@@ -1,0 +1,29 @@
+\documentclass[
+    varwidth=\maxdimen,
+    border={1000pt 100pt 100pt 100pt}
+]{standalone}
+
+\usepackage{fontspec} % loaded by polyglossia, but included here for transparency 
+\setmainfont{FreeSerif}
+\setsansfont{FreeSans}
+\setmonofont{FreeMono}
+
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+
+\usepackage[
+    % style=gost-alphabetic,
+    style=gost-numeric,
+    bibencoding=auto,
+    autolang=other
+]{biblatex}
+
+% \addbibresource{./bib_file.bib}
+\addbibresource{../group_theory.bib}
+
+\usepackage{showkeys}
+
+\begin{document}
+\nocite{*}
+\printbibliography
+\end{document}
