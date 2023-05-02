@@ -15,6 +15,10 @@
       # python = pkgs.python310;
       projectDir = ./.;
       preferWheels = true; # else it fails
+
+      # for development;
+      # TODO: remove runtime dependency
+      extraPackages = (p: [p.python-lsp-server]);
     });
 
     buildInputs = with pkgs; [

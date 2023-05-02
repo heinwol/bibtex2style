@@ -1,11 +1,15 @@
-# import os
+import os
 import argparse
 import subprocess
 import pathlib
+import shutil
 
+from typing import List, Tuple, Dict
+
+# provided by PyMuPDF
 import fitz
 
-from toolz import *
+from toolz.curried import *
 
 import openpyxl
 from openpyxl.cell.text import InlineFont
@@ -14,12 +18,7 @@ from openpyxl.cell.rich_text import TextBlock, CellRichText
 from lenses import lens
 import glom
 
-# print(os.getcwd()) 
-# print(subprocess.run('ls').stdout) 
-# it = pathlib.Path(__file__) 
-# print(it.resolve().parent)
- 
-def flags_decomposer(flags):
+def flags_decomposer(flags) -> List[str]:
     """Make font flags human readable."""
     l = []
     if flags & 2 ** 0:
@@ -45,7 +44,7 @@ get_text_and_formatting_from_span = flip(glom.glom)({
     'attributes': glom.Invoke(flags_decomposer).specs('flags')
 })
 
-def text_dict_to_openpyxl_text(d):
+def text_dict_to_openpyxl_text(d) -> TextBlock:
     if d['attributes'] == []:
         return d['text']
     else:
@@ -55,7 +54,7 @@ def text_dict_to_openpyxl_text(d):
         ),
         d['text'])
 
-def parse_pdf(doc):
+def parse_pdf(doc: fitz.Document) -> List[Tuple[TextBlock, CellRichText]]:
     # we have only one page
     page = doc[0]
     blocks = page.get_text("dict")["blocks"]
@@ -71,32 +70,71 @@ def parse_pdf(doc):
         lens.Each()[1].Each().modify(text_dict_to_openpyxl_text),
         lens.Each()[1].modify(lambda x: CellRichText(*x)),
     )
+    return bib_list
 
-doc = fitz.open("res.pdf")
+def bib_list_to_spreadsheet(bib_list: List[Tuple[TextBlock, CellRichText]]) -> openpyxl.Workbook:
+    wb = openpyxl.Workbook()
+    ws = wb.active
 
-wb = openpyxl.Workbook()
-ws = wb.active
-
-for row in bib_list:
-    ws.append(row)
+    for row in bib_list:
+        ws.append(row)
     
-max_first_col_width = max(len(cell.value or "") for cell in ws['A'])
-ws.column_dimensions['A'].width = max_first_col_width*1.3
-ws.column_dimensions['B'].width = 85
-for i in range(1, ws.max_row + 1):
-    ws.row_dimensions[i].height = 65
+    max_first_col_width = max(len(cell.value or "") for cell in ws['A'])
+    ws.column_dimensions['A'].width = max_first_col_width*1.3
+    ws.column_dimensions['B'].width = 85
+    for i in range(1, ws.max_row + 1):
+        ws.row_dimensions[i].height = 65
 
-first_col_alignment = openpyxl.styles.Alignment(
-    horizontal='center',
-    vertical='center'
-)
-ws.column_dimensions['A'].alignment = first_col_alignment
+    first_col_alignment = openpyxl.styles.Alignment(
+        horizontal='center',
+        vertical='center'
+    )
+    ws.column_dimensions['A'].alignment = first_col_alignment
 
-second_col_alignment = openpyxl.styles.Alignment(
-    wrapText = True
-)
-ws.column_dimensions['B'].alignment = second_col_alignment
+    second_col_alignment = openpyxl.styles.Alignment(
+        wrapText = True
+    )
+    ws.column_dimensions['B'].alignment = second_col_alignment
 
-ws.sheet_view.zoomScale = 100
+    ws.sheet_view.zoomScale = 100
+    return wb
 
-wb.save('temp.xlsx')
+def main():
+
+    parser = argparse.ArgumentParser(description='Process a .bib file to get .xlsx with styling')
+    parser.add_argument('bib_file',
+                        type=str,
+                        help='.bib bibliography file to convert')
+    parser.add_argument('xlsx_file',
+                        nargs='?',
+                        default='bibliography.xlsx',
+                        help='(optional) path to desired .xlsx file')
+    args = parser.parse_args()
+
+    bib_file = pathlib.Path(args.bib_file).resolve()
+    xlsx_file = pathlib.Path(args.xlsx_file).resolve()
+    current_dir = pathlib.Path(os.getcwd()).resolve()
+    project_dir = pathlib.Path(__file__).resolve().parent
+    tempdir = current_dir.joinpath('.bibtex2style')
+
+    if tempdir.exists():
+        shutil.rmtree(tempdir)
+    os.mkdir(tempdir)
+    os.chdir(tempdir)
+    shutil.copy(project_dir.joinpath('process_bib_file.tex'), tempdir)
+    shutil.copyfile(bib_file, tempdir.joinpath('bib_file.bib'))
+
+    latexcmd_res = subprocess.run(['latexmk', '-pdflatex=lualatex', '-pdf'])
+    if latexcmd_res.returncode != 0:
+        raise ChildProcessError('\n\n\nlatex terminated with error, check logs\n')
+    else:
+        doc = fitz.open('process_bib_file.pdf')
+        bib_list = parse_pdf(doc)
+        wb = bib_list_to_spreadsheet(bib_list)
+        
+        wb.save('temp.xlsx')
+        shutil.copyfile('temp.xlsx', xlsx_file)
+        shutil.rmtree(tempdir)
+
+if __name__ == '__main__':
+    main()
