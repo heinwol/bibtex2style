@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "bibtex2style"
+version = "0.1.0"
+description = "bibtex2style is a script that takes .bib file as an input and produces an .xlsx file with entries processed by biblatex with an according style (like `gost`). It also respects bold an italics fonts!"
+authors = ["heinwol <koreshkovhw@yandex.ru>"]
+license = "gpl3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+PyMuPDF = "^1.22.2"
+fitz = "^0.0.1.dev2"
+toolz = "^0.12.0"
+openpyxl = ">=3.1"
+lenses = "^1.1.0"
+glom = "^23.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
