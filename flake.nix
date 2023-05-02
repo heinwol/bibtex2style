@@ -3,18 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    # pypi-deps-db = {
-    #   url = "github:DavHau/pypi-deps-db";
-    #   flake = false;
-    # };
-    mach-nix = {
-      url = "github:DavHau/mach-nix/master";
-      # inputs = {
-        # nixpkgs.follows = "nixpkgs";
-        # pypi-deps-db.follows = "pypi-deps-db";
-      # };
-    };
-    # mach-nix.python = "python310";
   };
 
   outputs = { self, nixpkgs, mach-nix }: let
@@ -23,25 +11,24 @@
   
     pkgs = nixpkgs.legacyPackages.${system};
 
-    pyEnv = mach-nix.lib.${system}.mkPython {
-      requirements = ''
-        PyMuPDF
-        fitz
-        toolz
-        openpyxl==3.1
-        lenses
-        glom
-      '';
-    };
-    
+    python-with-pkgs = (pkgs.poetry2nix.mkPoetryEnv {
+      # python = pkgs.python310;
+      projectDir = ./.;
+      preferWheels = true; # else it fails
+    });
+
     buildInputs = with pkgs; [
-      pyEnv
+      python-with-pkgs
+      poetry
     ];
 
     devShells.default = pkgs.mkShell {
-      inherit buildInputs;
+      # nativeBuildInputs = buildInputs;
+      packages = buildInputs;
       shellHook = ''
-        echo "lalala"
+        # echo "lalala"
+        # echo "${python-with-pkgs}"
+        eval fish || true
       '';
     };
     

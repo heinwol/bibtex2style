@@ -30,10 +30,8 @@
         "type": "github"
       },
       "original": {
-        "owner": "DavHau",
-        "ref": "master",
-        "repo": "mach-nix",
-        "type": "github"
+        "id": "mach-nix",
+        "type": "indirect"
       }
     },
     "nixpkgs": {
