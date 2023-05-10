@@ -11,25 +11,20 @@ rec {
   
     pkgs = nixpkgs.legacyPackages.${system};
 
-    python-with-pkgs = (pkgs.poetry2nix.mkPoetryEnv {
-      # python = pkgs.python310;
-      projectDir = ./.;
-      preferWheels = true; # else it fails
-
-      # for development;
-      # TODO: remove runtime dependency
-      extraPackages = (p: [p.python-lsp-server]);
-    });
-
     tex-with-pkgs = (pkgs.texlive.combine {
       inherit (pkgs.texlive)
         scheme-basic
-        luatex
-        polyglossia
+        biber
         biblatex
-        showkeys
-        collection-langcyrillic
         biblatex-gost
+        collection-langcyrillic
+        latexmk
+        luatex
+        luatex85
+        luatexbase
+        polyglossia
+        standalone
+        varwidth
         ;
     });
 
@@ -38,17 +33,47 @@ rec {
     ];
 
     devShells.default = pkgs.mkShell {
-      packages = buildInputs ++ [python-with-pkgs pkgs.poetry];
+      packages = buildInputs ++ [
+        pkgs.poetry
+        (pkgs.poetry2nix.mkPoetryEnv {
+          projectDir = ./.;
+          preferWheels = true; # else it fails
+
+          # for development;
+          # TODO: remove runtime dependency
+          extraPackages = (p: [p.python-lsp-server]);
+        })];
       shellHook = ''
         echo "entering dev shell..."
         eval fish || true
       '';
     };
 
-    bibtex2style = pkgs.poetry2nix.mkPoetryApplication {
+    package-env = pkgs.poetry2nix.mkPoetryApplication {
       projectDir = ./.;
       preferWheels = true; # else it fails
-      inherit buildInputs;
+    };
+    
+    bibtex2style = pkgs.stdenvNoCC.mkDerivation {
+
+      name = "bibtex2style";
+
+      src = ./.;
+      
+      buildInputs = buildInputs ++ [
+        pkgs.makeWrapper
+      ];
+
+      installPhase = ''
+        mkdir -p $out/bin
+        ln -s "${package-env.dependencyEnv}/bin/bibtex2style" "$out/bin/"
+      '';
+      
+      postFixup = ''
+        wrapProgram $out/bin/bibtex2style \
+          --set PATH ${pkgs.lib.makeBinPath buildInputs}
+      '';
+      
       meta = {
         inherit description;
       };
@@ -56,7 +81,10 @@ rec {
     
   in {
     devShells.${system} = devShells;
-    packages.${system}.bibtex2style = bibtex2style;
-    packages.${system}.default = self.packages.x86_64-linux.bibtex2style;
+    packages.${system} = {
+      bibtex2style = bibtex2style;
+      default = bibtex2style;
+      package-env = package-env.dependencyEnv;
+    };
   };
 }
