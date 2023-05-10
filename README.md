@@ -10,7 +10,7 @@ By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost)
 
 Using the script is simple:
 ```bash
-python bibtex2style.py test.bib styled_result.xlsx
+bibtex2style test.bib styled_result.xlsx
 ```
 ### Example
 
@@ -72,12 +72,8 @@ python bibtex2style.py test.bib styled_result.xlsx
 
 If you happen to use [nix](https://nixos.org/learn.html) with flakes:
 ```bash
-git clone https://github.com/heinwol/bibtex2style
-cd bibtex2style
-nix develop
-python bibtex2style.py test.bib styled_result.xlsx
+nix build github:heinwol/bibtex2style#default
 ```
-Only development shell works for now and it misses many dependencies.
 
 ### Manual
 
