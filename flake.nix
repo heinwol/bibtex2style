@@ -1,11 +1,11 @@
-{
+rec {
   description = "bibtex2style is a script that takes .bib file as an input and produces an .xlsx file with entries processed by biblatex with an according style (like `gost`). It also respects bold an italics fonts!";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = { self, nixpkgs, mach-nix }: let
+  outputs = { self, nixpkgs }: let
 
     system = "x86_64-linux";
   
@@ -21,24 +21,42 @@
       extraPackages = (p: [p.python-lsp-server]);
     });
 
-    buildInputs = with pkgs; [
-      python-with-pkgs
-      poetry
+    tex-with-pkgs = (pkgs.texlive.combine {
+      inherit (pkgs.texlive)
+        scheme-basic
+        luatex
+        polyglossia
+        biblatex
+        showkeys
+        collection-langcyrillic
+        biblatex-gost
+        ;
+    });
+
+    buildInputs = [
+      tex-with-pkgs
     ];
 
     devShells.default = pkgs.mkShell {
-      # nativeBuildInputs = buildInputs;
-      packages = buildInputs;
+      packages = buildInputs ++ [python-with-pkgs pkgs.poetry];
       shellHook = ''
-        # echo "lalala"
-        # echo "${python-with-pkgs}"
+        echo "entering dev shell..."
         eval fish || true
       '';
+    };
+
+    bibtex2style = pkgs.poetry2nix.mkPoetryApplication {
+      projectDir = ./.;
+      preferWheels = true; # else it fails
+      inherit buildInputs;
+      meta = {
+        inherit description;
+      };
     };
     
   in {
     devShells.${system} = devShells;
-    # packages.x86_64-linux.bibtex2style = 1;
-    # packages.x86_64-linux.default = self.packages.x86_64-linux.bibtex2style;
+    packages.${system}.bibtex2style = bibtex2style;
+    packages.${system}.default = self.packages.x86_64-linux.bibtex2style;
   };
 }

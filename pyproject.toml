@@ -17,6 +17,8 @@ lenses = "^1.1.0"
 glom = "^23.3.0"
 lxml = "^4.9.2"
 
+[tool.poetry.scripts]
+bibtex2style = 'bibtex2style:main'
 
 [build-system]
 requires = ["poetry-core"]
