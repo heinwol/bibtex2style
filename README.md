@@ -1,8 +1,10 @@
 # bibtex2style
 
+Imagine you're an organized person and you manage all your bibliography with some bibliography manager like [jabref](https://www.jabref.org/). The manager you prefer stores all the data inside `.bib` files, hence it's straightforward to use it in latex. Now imagine that for whatever reason you need to have your bibliography in text format. Maybe your institution wants a report in `.docx` format from you, or you want to include references in a presentation, or send them via email... who knows why. The point where you convert `.bib` file to text is the tricky one. There are solutions like [CSL](https://github.com/citation-style-language/styles#readme), but they don't have good support for some citation styles. The script presented here utilizes latex to create citations, so if your citation style is supported in latex this script also supports it.
+
 bibtex2style is a script that takes .bib file as an input and produces an .xlsx file with entries processed by biblatex with an according style (like `gost`). It also respects bold an italics fonts!
 
-bibtex2style also adds cite keys to .xlsx file (see [example](#Example), so it should be made easy to find and manage citations.
+bibtex2style also adds cite keys to .xlsx file (see [example](#Example)), so it should be easy to find and manage citations.
 
 By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost) style. One can modify [tex source](https://github.com/heinwol/bibtex2style/blob/main/process_bib_file.tex#L15) to change the style (temporary solution). 
 
@@ -10,7 +12,7 @@ By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost)
 
 Using the script is simple:
 ```bash
-bibtex2style test.bib styled_result.xlsx
+bibtex2style test.bib [styled_result.xlsx]
 ```
 ### Example
 
@@ -75,14 +77,16 @@ If you happen to use [nix](https://nixos.org/learn.html) with flakes:
 nix build github:heinwol/bibtex2style#default
 ```
 
+All the dependencies are already there, it's plug&play.
+
 ### Manual
 
 ```bash
 git clone https://github.com/heinwol/bibtex2style
 cd bibtex2style
 pip install poetry
-poetry env use python
-python bibtex2style.py test.bib styled_result.xlsx
+poetry build
+pip install dist/bibtex2style-0.1.0-py3-none-any.whl
 ```
 
 Along with lines above you are expected to have some programs installed, see [Requirements](#Requirements).
@@ -90,10 +94,15 @@ Along with lines above you are expected to have some programs installed, see [Re
 ## Requirements
 
 - `python` with `pip` installed. I used 3.10, in theory it should work with several prior releases
-- `Latex`. Whatever distribution and version of latex you can find **with the following packages**:
-  - `latexmk`
-  - `lualatex`
+- `LaTeX`. Whatever distribution and version of latex you can find **with the following packages** (this list is made for texlive, package names for MiKTeX may differ):
+  - `biber`
   - `biblatex`
+  - `latexmk`
+  - `luatex`
+  - `luatex85`
+  - `luatexbase`
   - `polyglossia`
-  - `showkeys`
+  - `standalone`
+  - `varwidth`
+  - language package for the according language, by default it is `collection-langcyrillic`
   - style package you want to use with `biblatex`, by default it is `biblatex-gost`
