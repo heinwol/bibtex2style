@@ -6,7 +6,7 @@ bibtex2style is a script that takes .bib file as an input and produces an .xlsx 
 
 bibtex2style also adds cite keys to .xlsx file (see [example](#Example)), so it should be easy to find and manage citations.
 
-By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost) style. One can modify [tex source](https://github.com/heinwol/bibtex2style/blob/main/process_bib_file.tex#L15) to change the style (temporary solution). 
+By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost) style. One can modify [tex source](https://github.com/heinwol/bibtex2style/blob/main/bibtex2style/process_bib_file.tex#L15) to change the style (temporary solution). 
 
 ## Usage
 
