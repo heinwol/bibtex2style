@@ -18,7 +18,8 @@ bibtex2style test.bib [styled_result.xlsx]
 
 #### Input
 
-`bibfile.bib` contents:
+`test.bib` contents:
+
 ```tex
 @article{Безверхний2014,
     author = {Безверхний, Н. В.},
@@ -66,6 +67,7 @@ bibtex2style test.bib [styled_result.xlsx]
 #### Output
 
 `styled_result.xlsx` contents:
+
 ![result](./example/styled_result.png)
 
 ## Installation
