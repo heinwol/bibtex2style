@@ -133,27 +133,28 @@ def main():
     xlsx_file = pathlib.Path(args.xlsx_file).resolve()
     current_dir = pathlib.Path(os.getcwd()).resolve()
     project_dir = pathlib.Path(__file__).resolve().parent
-    tempdir = current_dir.joinpath('.bibtex2style')
+    temp_dir = current_dir.joinpath('.bibtex2style')
 
-    if tempdir.exists():
-        shutil.rmtree(tempdir)
-    os.mkdir(tempdir)
-    os.chdir(tempdir)
-    shutil.copy(project_dir.joinpath('process_bib_file.tex'), tempdir)
-    shutil.copyfile(bib_file, tempdir.joinpath('bib_file.bib'))
+    if temp_dir.exists():
+        shutil.rmtree(temp_dir)
+    os.mkdir(temp_dir)
+    os.chdir(temp_dir)
+    shutil.copy(project_dir.joinpath('process_bib_file.tex'), temp_dir)
+    shutil.copyfile(bib_file, temp_dir.joinpath('bib_file.bib'))
 
     latexcmd_res = subprocess.run(['latexmk', '-pdflatex=lualatex', '-pdf'])
     if latexcmd_res.returncode != 0:
         raise ChildProcessError('latex terminated with error, check logs\n')
     else:
-        wait_for_file_to_be_available('process_bib_file.pdf')
+        # wait_for_file_to_be_available('process_bib_file.pdf')
         with fitz.open('process_bib_file.pdf') as doc:
             bib_list = parse_pdf(doc)
         wb = bib_list_to_spreadsheet(bib_list)
         
         wb.save('temp.xlsx')
         shutil.copyfile('temp.xlsx', xlsx_file)
-        shutil.rmtree(tempdir)
+        os.chdir(current_dir)
+        shutil.rmtree(temp_dir)
 
 if __name__ == '__main__':
     main()
