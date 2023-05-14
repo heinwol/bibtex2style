@@ -96,9 +96,11 @@ Along with lines above you are expected to have some programs installed, see [Re
 ## Requirements
 
 - `python` with `pip` installed. I used 3.10, in theory it should work with several prior releases
+- `perl`. Required by latexmk
 - `LaTeX`. Whatever distribution and version of latex you can find **with the following packages** (this list is made for texlive, package names for MiKTeX may differ):
   - `biber`
   - `biblatex`
+  - `cm-unicode` -- fonts. Maybe you'll need to install `cm-super` if your language is not supported.
   - `latexmk`
   - `luatex`
   - `luatex85`
