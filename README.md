@@ -6,7 +6,7 @@ bibtex2style is a script that takes .bib file as an input and produces an .xlsx 
 
 bibtex2style also adds cite keys to .xlsx file (see [example](#Example)), so it should be easy to find and manage citations.
 
-By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost) style. One can modify [tex source](https://github.com/heinwol/bibtex2style/blob/main/process_bib_file.tex#L15) to change the style (temporary solution). 
+By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost) style. One can modify [tex source](https://github.com/heinwol/bibtex2style/blob/main/bibtex2style/process_bib_file.tex#L15) to change the style (temporary solution). 
 
 ## Usage
 
@@ -18,7 +18,8 @@ bibtex2style test.bib [styled_result.xlsx]
 
 #### Input
 
-`bibfile.bib` contents:
+`test.bib` contents:
+
 ```tex
 @article{Безверхний2014,
     author = {Безверхний, Н. В.},
@@ -66,6 +67,7 @@ bibtex2style test.bib [styled_result.xlsx]
 #### Output
 
 `styled_result.xlsx` contents:
+
 ![result](./example/styled_result.png)
 
 ## Installation
@@ -94,9 +96,11 @@ Along with lines above you are expected to have some programs installed, see [Re
 ## Requirements
 
 - `python` with `pip` installed. I used 3.10, in theory it should work with several prior releases
+- `perl`. Required by latexmk
 - `LaTeX`. Whatever distribution and version of latex you can find **with the following packages** (this list is made for texlive, package names for MiKTeX may differ):
   - `biber`
   - `biblatex`
+  - `cm-unicode` -- fonts. Maybe you'll need to install `cm-super` if your language is not supported.
   - `latexmk`
   - `luatex`
   - `luatex85`
