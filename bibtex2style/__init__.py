@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import pathlib
 import shutil
+from time import sleep
 
 from typing import List, Tuple, Dict
 
@@ -53,6 +54,23 @@ def text_dict_to_openpyxl_text(d) -> TextBlock:
             i=('italic' in d['attributes'])
         ),
         d['text'])
+
+def wait_for_file_to_be_available(fname: str) -> None:
+    """
+        at least on windows and with miktex, the latexmk
+        command exits prior to the pdf file being actually closed.
+        We have to wait then 
+    """
+    for i in range(7):
+        try:
+            with open(fname, 'rb'):
+                pass
+            return
+        except PermissionError:
+            print('trying to access .pdf file...')
+            sleep(0.3)
+    with open(fname, 'rb'):
+        pass
 
 def parse_pdf(doc: fitz.Document) -> List[Tuple[TextBlock, CellRichText]]:
     # we have only one page
@@ -126,8 +144,9 @@ def main():
 
     latexcmd_res = subprocess.run(['latexmk', '-pdflatex=lualatex', '-pdf'])
     if latexcmd_res.returncode != 0:
-        raise ChildProcessError('\n\n\nlatex terminated with error, check logs\n')
+        raise ChildProcessError('latex terminated with error, check logs\n')
     else:
+        wait_for_file_to_be_available('process_bib_file.pdf')
         doc = fitz.open('process_bib_file.pdf')
         bib_list = parse_pdf(doc)
         wb = bib_list_to_spreadsheet(bib_list)
