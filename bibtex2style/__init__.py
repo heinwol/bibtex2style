@@ -55,23 +55,6 @@ def text_dict_to_openpyxl_text(d) -> TextBlock:
         ),
         d['text'])
 
-def wait_for_file_to_be_available(fname: str) -> None:
-    """
-        at least on windows and with miktex, the latexmk
-        command exits prior to the pdf file being actually closed.
-        We have to wait then 
-    """
-    for i in range(7):
-        try:
-            with open(fname, 'rb'):
-                pass
-            return
-        except PermissionError:
-            print('trying to access .pdf file...')
-            sleep(0.3)
-    with open(fname, 'rb'):
-        pass
-
 def parse_pdf(doc: fitz.Document) -> List[Tuple[TextBlock, CellRichText]]:
     # we have only one page
     page = doc[0]
@@ -146,7 +129,6 @@ def main():
     if latexcmd_res.returncode != 0:
         raise ChildProcessError('latex terminated with error, check logs\n')
     else:
-        # wait_for_file_to_be_available('process_bib_file.pdf')
         with fitz.open('process_bib_file.pdf') as doc:
             bib_list = parse_pdf(doc)
         wb = bib_list_to_spreadsheet(bib_list)
