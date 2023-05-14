@@ -147,8 +147,8 @@ def main():
         raise ChildProcessError('latex terminated with error, check logs\n')
     else:
         wait_for_file_to_be_available('process_bib_file.pdf')
-        doc = fitz.open('process_bib_file.pdf')
-        bib_list = parse_pdf(doc)
+        with fitz.open('process_bib_file.pdf') as doc:
+            bib_list = parse_pdf(doc)
         wb = bib_list_to_spreadsheet(bib_list)
         
         wb.save('temp.xlsx')
