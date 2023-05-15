@@ -18,6 +18,7 @@ rec {
         biblatex
         biblatex-gost
         collection-langcyrillic
+        cm-unicode
         latexmk
         luatex
         luatex85
