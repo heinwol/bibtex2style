@@ -82,11 +82,25 @@ rec {
         };
       };
 
+      dockerImage = pkgs.dockerTools.buildImage {
+        name = "bibtex2style";
+        tag = "latest";
+        copyToRoot = pkgs.buildEnv {
+          name = "image-root";
+          paths = [ bibtex2style pkgs.bash ];
+          pathsToLink = [ "/bin" ];
+        };
+        config = {
+          WorkingDir = "/temp";
+          Cmd = [ "${bibtex2style}/bin/bibtex2style" ];
+        };
+      };
+
     in
     {
       devShells.${system} = devShells;
       packages.${system} = {
-        bibtex2style = bibtex2style;
+        inherit bibtex2style dockerImage;
         default = bibtex2style;
         package-env = package-env.dependencyEnv;
       };
