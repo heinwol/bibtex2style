@@ -14,6 +14,7 @@ Using the script is simple:
 ```console
 $ bibtex2style test.bib [styled_result.xlsx]
 ```
+### Docker
 
 If you use docker then this command should do the trick:
 ```console
@@ -22,9 +23,9 @@ $ docker run -it -v $(pwd):/temp --rm bibtex2style:latest bibtex2style test.bib 
 
 Beware though:
 1. The line above works for linux, if you run it on windows use the windows `$(pwd)` alternative, idk what it is;
-2. At least on linux, modifying files with docker the issue when whatever file it creates becomes owned by root. To avoid this you can either perform some nontrivial steps as described in e.g. [here](https://vsupalov.com/docker-shared-permissions/) or use podman.
+2. At least on linux, modifying files with docker has the issue when whatever file it creates becomes owned by root. To avoid this you can either perform some nontrivial steps as described in e.g. [here](https://vsupalov.com/docker-shared-permissions/) or use podman.
 
-### Example
+## Example
 
 #### Input
 
