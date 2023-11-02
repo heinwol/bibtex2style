@@ -11,10 +11,21 @@ By default bibtex2style uses [biblatex-gost](https://ctan.org/pkg/biblatex-gost)
 ## Usage
 
 Using the script is simple:
-```bash
-bibtex2style test.bib [styled_result.xlsx]
+```console
+$ bibtex2style test.bib [styled_result.xlsx]
 ```
-### Example
+### Docker
+
+If you use docker then this command should do the trick:
+```console
+$ docker run -it -v $(pwd):/temp --rm bibtex2style:latest bibtex2style test.bib [styled_result.xlsx]
+```
+
+Beware though:
+1. The line above works for linux, if you run it on windows use the windows `$(pwd)` alternative, idk what it is;
+2. At least on linux, modifying files with docker has the issue when whatever file it creates becomes owned by root. To avoid this you can either perform some nontrivial steps as described in e.g. [here](https://vsupalov.com/docker-shared-permissions/) or use podman.
+
+## Example
 
 #### Input
 
@@ -74,16 +85,28 @@ bibtex2style test.bib [styled_result.xlsx]
 
 ### Nix
 
-If you happen to use [nix](https://nixos.org/learn.html) with flakes:
-```bash
-nix build github:heinwol/bibtex2style#default
+If you happen to use [nix](https://nixos.org/learn.html) with flakes you can build it with:
+```console
+$ nix build github:heinwol/bibtex2style#default
+```
+Or install directly to your profile:
+```console
+$ nix profile install github:heinwol/bibtex2style#default
 ```
 
 All the dependencies are already there, it's plug&play.
 
+### Docker
+
+Provided you have docker installed on your system just load the downloaded image:
+```console
+$ docker load -i docker-image-bibtex2style-0.1.0.tar.gz 
+```
+then run the container as described above.
+
 ### Manual
 
-```bash
+```console
 git clone https://github.com/heinwol/bibtex2style
 cd bibtex2style
 pip install poetry
