@@ -16,9 +16,10 @@ rec {
 
       pkgs = nixpkgs.legacyPackages.${system};
       # poetry2nix = inputs.poetry2nix.packages.${system}.default;
-      inherit (inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; })
-        mkPoetryApplication
-        mkPoetryEnv;
+      poetry2nixLib = (inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; });
+      # mkPoetryApplication
+      # mkPoetryEnv
+      # overrides;
 
       tex-with-pkgs = (pkgs.texlive.combine {
         inherit (pkgs.texlive)
@@ -42,10 +43,18 @@ rec {
         tex-with-pkgs
       ];
 
+      poetryOverrides = poetry2nixLib.overrides.withDefaults (final: prev: {
+        pymupdf = pkgs.python311Packages.pymupdf;
+        # prev.pymupdf.override {
+        #   # preferWheel = true;
+        #   # buildInputs = (prev.buildInputs or [ ]) ++ [ pkgs.mupdf ];
+        # };
+      });
+
       devShells.default = pkgs.mkShell {
         packages = buildInputs ++ [
           pkgs.poetry
-          (mkPoetryEnv {
+          (poetry2nixLib.mkPoetryEnv {
             projectDir = ./.;
             preferWheels = true; # else it fails
 
@@ -54,15 +63,17 @@ rec {
             extraPackages = (p: [ p.python-lsp-server ]);
           })
         ];
+        overrides = poetryOverrides;
         shellHook = ''
           echo "entering dev shell..."
           eval fish || true
         '';
       };
 
-      package-env = mkPoetryApplication {
+      package-env = poetry2nixLib.mkPoetryApplication {
         projectDir = ./.;
         preferWheels = true; # else it fails
+        overrides = poetryOverrides;
       };
 
       bibtex2style = pkgs.stdenvNoCC.mkDerivation {
@@ -76,8 +87,12 @@ rec {
         ];
 
         installPhase = ''
+          runHook preInstall
+
           mkdir -p $out/bin
           ln -s "${package-env.dependencyEnv}/bin/bibtex2style" "$out/bin/"
+
+          runHook postInstall
         '';
 
         postFixup = ''
