@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "bibtex2style"
-version = "0.1.0"
+version = "0.1.1"
 description = "bibtex2style is a script that takes .bib file as an input and produces an .xlsx file with entries processed by biblatex with an according style (like `gost`). It also respects bold an italics fonts!"
 authors = ["heinwol <koreshkovhw@yandex.ru>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
 repository = "https://github.com/heinwol/bibtex2style"
-packages = [{include = "bibtex2style"}]
+packages = [{ include = "bibtex2style" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"

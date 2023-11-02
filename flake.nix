@@ -3,14 +3,22 @@ rec {
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, ... }@inputs:
     let
 
       system = "x86_64-linux";
 
       pkgs = nixpkgs.legacyPackages.${system};
+      # poetry2nix = inputs.poetry2nix.packages.${system}.default;
+      inherit (inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; })
+        mkPoetryApplication
+        mkPoetryEnv;
 
       tex-with-pkgs = (pkgs.texlive.combine {
         inherit (pkgs.texlive)
@@ -37,7 +45,7 @@ rec {
       devShells.default = pkgs.mkShell {
         packages = buildInputs ++ [
           pkgs.poetry
-          (pkgs.poetry2nix.mkPoetryEnv {
+          (mkPoetryEnv {
             projectDir = ./.;
             preferWheels = true; # else it fails
 
@@ -52,7 +60,7 @@ rec {
         '';
       };
 
-      package-env = pkgs.poetry2nix.mkPoetryApplication {
+      package-env = mkPoetryApplication {
         projectDir = ./.;
         preferWheels = true; # else it fails
       };
